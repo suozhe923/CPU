@@ -1,3 +1,14 @@
+`define R 7'b0110011
+`define I 7'b0010011
+`define L 7'b0000011
+`define S 7'b0100011
+`define B 7'b1100011
+`define J 7'b1101111
+`define I_jalr 7'b1100111
+`define U_lui 7'b0110111
+`define U_auipc 7'b0010111
+`define I_sys 7'b1110011
+
 module Decoder(
     input clk,
     input rst,
@@ -21,27 +32,27 @@ module Decoder(
     always @(*) begin
         case(opcode)
             // B-type Instructions
-            7'b1100011: begin
+            `B: begin
                 imm32_reg = ( {{20{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8]} ) << 1;
             end
 
             // S-type Instructions
-            7'b0100011: begin
+            `S: begin
                 imm32_reg = { {20{inst[31]}}, inst[31:25], inst[11:7] };
             end
 
             // I-type Instructions
-            7'b0000011, 7'b0010011, 7'b1100111: begin
+            `I, `L, `I_jalr: begin
                 imm32_reg = { {20{inst[31]}}, inst[31:20] };
             end
 
             // U-type Instructions
-            7'b0110111, 7'b0010111: begin
+            `U_lui, `U_auipc: begin
             imm32_reg = {inst[31:12], 12'b0};
         end
 
             // J-type Instructions
-            7'b1101111: begin
+            `J: begin
             imm32_reg = ( {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0} ) << 1;
         end
 
@@ -59,9 +70,8 @@ module Decoder(
             registers[idx] <= 32'b0;  // Non-blocking assignment for synchronous reset
         end
     end
-    // Normal register write operation
     else if (regWrite && (inst[11:7] != 5'b0)) begin
-        // Protected write to register file
+        // x0 is always 0.
         registers[inst[11:7]] <= writeData;
     end
 end
