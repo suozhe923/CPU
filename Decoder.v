@@ -66,14 +66,15 @@ module Decoder(
     always @(posedge clk or negedge rst) begin
         // Initialize all 32 registers to zero
         if (!rst) begin
-            for (integer idx = 0; idx < 32; idx = idx + 1) begin
-            registers[idx] <= 32'b0;  // Non-blocking assignment for synchronous reset
+            for (idx = 0; idx < 32; idx = idx + 1) begin
+                registers[idx] <= 32'b0;  // Non-blocking assignment for synchronous reset
+            end
+        end
+
+        else if (regWrite && (inst[11:7] != 5'b0)) begin
+            // x0 is always 0.
+            registers[inst[11:7]] <= writeData;
         end
     end
-    else if (regWrite && (inst[11:7] != 5'b0)) begin
-        // x0 is always 0.
-        registers[inst[11:7]] <= writeData;
-    end
-end
 
 endmodule
