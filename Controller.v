@@ -33,7 +33,8 @@
 module Controller(
     input [31:0] inst,
     output reg [3:0] ALUOp,
-    output reg Branch, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite
+    output reg [1:0] ALUSrc,
+    output reg Branch, MemRead, MemWrite, MemtoReg, RegWrite
 );
 
 always @(*) begin  // ALUOp
@@ -84,6 +85,7 @@ end
 always @(*) begin  // ALUSrc
     case (inst[6:0])
         `I, `L, `S, `U_lui: ALUSrc = 1;
+        `U_auipc: ALUSrc = 2;
         default: ALUSrc = 0;
     endcase
 end
