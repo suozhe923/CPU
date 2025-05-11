@@ -11,7 +11,7 @@ module IFetch(
         if(!rst) //initialize
             pc<= 32'b0;
         else if(branch & zero) //branch
-            pc<=pc+imm32;
+            pc<=pc+(imm32<<1);
         else //Sequential execution
             pc<=pc+4;
     end
