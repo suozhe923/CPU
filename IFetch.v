@@ -10,7 +10,7 @@ module IFetch(
     always@ (negedge clk or negedge rst) begin
         if(!rst) //initialize
             pc<= 32'b0;
-        else if(branch & zero) //branch
+        else if(branch & ~zero) //branch
             pc<=pc+(imm32<<1);
         else //Sequential execution
             pc<=pc+4;
