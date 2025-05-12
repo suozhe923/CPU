@@ -1,6 +1,3 @@
-parameter R = 7'b0110011, I = 7'b0010011, L = 7'b0000011, S = 7'b0100011, B = 7'b1100011;
-parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b0010111, I_sys = 7'b1110011;
-
 module Decoder(
     input clk,
     input rst,
@@ -11,6 +8,8 @@ module Decoder(
     output [31:0] rs2Data,    // Source Register 2 Output
     output [31:0] imm32       // Sign-extended Immediate Output
 );
+parameter R = 7'b0110011, I = 7'b0010011, L = 7'b0000011, S = 7'b0100011, B = 7'b1100011;
+parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b0010111, I_sys = 7'b1110011;
 
     reg [31:0] registers [0:31];  // x0 hardwired to 0 (write-protected)
 
