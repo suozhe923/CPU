@@ -1,13 +1,5 @@
-`define R 7'b0110011
-`define I 7'b0010011
-`define L 7'b0000011
-`define S 7'b0100011
-`define B 7'b1100011
-`define J 7'b1101111
-`define I_jalr 7'b1100111
-`define U_lui 7'b0110111
-`define U_auipc 7'b0010111
-`define I_sys 7'b1110011
+parameter R = 7'b0110011, I = 7'b0010011, L = 7'b0000011, S = 7'b0100011, B = 7'b1100011;
+parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b0010111, I_sys = 7'b1110011;
 
 module Decoder(
     input clk,
@@ -32,27 +24,27 @@ module Decoder(
     always @(*) begin
         case(opcode)
             // B-type Instructions
-            `B: begin
+            B: begin
                 imm32_reg = ( {{20{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8]} ) << 1;
             end
 
             // S-type Instructions
-            `S: begin
+            S: begin
                 imm32_reg = { {20{inst[31]}}, inst[31:25], inst[11:7] };
             end
 
             // I-type Instructions
-            `I, `L, `I_jalr: begin
+            I, L, I_jalr: begin
                 imm32_reg = { {20{inst[31]}}, inst[31:20] };
             end
 
             // U-type Instructions
-            `U_lui, `U_auipc: begin
+            U_lui, U_auipc: begin
             imm32_reg = {inst[31:12], 12'b0};
         end
 
             // J-type Instructions
-            `J: begin
+            J: begin
             imm32_reg = ( {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0} ) << 1;
         end
 
