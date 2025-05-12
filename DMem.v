@@ -4,8 +4,6 @@ module DMem(
     input [31:0] addr,
     input [31:0] din,
     output[31:0] dout);
-    RAM udram(.clka(clk), .wea(MemWrite), .addra(addr[13:0]), .dina(din), .douta(dout));
+    RAM udram(.clka(~clk), .wea(MemWrite), .addra(addr[13:0]), .dina(din), .douta(dout));
 endmodule
 
-
-// need to consider lb,sb等非32位对齐的情况
