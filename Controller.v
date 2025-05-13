@@ -12,7 +12,7 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
 
 always @(*) begin  // ALUOp
     case (inst[6:0])
-        L, S, J, I_jalr: ALUOp = 0;
+        L, S, I_jalr, J: ALUOp = 0;
         B: begin
             case (inst[14:12])
                 0: ALUOp = 8;  // beq
@@ -57,8 +57,7 @@ end
 
 always @(*) begin  // ALUSrc
     case (inst[6:0])
-        I, L, S, U_lui: ALUSrc = 1;
-        U_auipc: ALUSrc = 2;
+        I, L, S, U_lui, U_auipc: ALUSrc = 1;
         default: ALUSrc = 0;
     endcase
 end
