@@ -2,6 +2,7 @@
 module CPU(
     input clk,rst,
     output wire [31:0] pc, // from IFetch to OpMux
+    output wire [31:0] pcOld, // from IFetch to Decoder
     output wire [31:0] inst, // from IFetch to Decoder, Controller
 
     output wire branch, // from Controller(Branch) to IFetch
@@ -23,7 +24,9 @@ module CPU(
 
     output wire [31:0] dout, // from DMem to WriteMux
 
-    output wire [31:0] writeData // from WriteMux to Decoder
+    output wire [31:0] writeData, // from WriteMux to Decoder
+
+    output wire [31:0] rs1
     );
 
 // First, at the posedge of clk, IFetch get instruction from prgrom
@@ -33,14 +36,12 @@ module CPU(
 // Fifth, DMem read/write with ALUResult and rs2Data at the negedge of clk
 // Sixth, WriteMux update the writeData with ALUResult and dout
 
-    IFetch ife(.clk(clk), .rst(rst), .branch(branch), .zero(zero), .imm32(imm32), .inst(inst), .pc(pc)); //finish
+    IFetch ife(.clk(clk), .rst(rst), .branch(branch), .zero(zero), .imm32(imm32), .inst(inst), .pc(pc),.pcOld(pcOld),.rs1Data(rs1Data)); //finish
     Controller ctrl(.inst(inst), .ALUOp(ALUOp), .ALUSrc(ALUSrc), .Branch(branch), .MemRead(MemRead), .MemWrite(MemWrite), .MemtoReg(MemtoReg), .RegWrite(RegWrite));
-    Decoder dc (.clk(clk), .rst(rst), .regWrite(RegWrite), .inst(inst), .writeData(writeData), .imm32(imm32), .rs1Data(rs1Data), .rs2Data(rs2Data)); //finish
+    Decoder dc (.clk(clk), .rst(rst), .regWrite(RegWrite), .inst(inst), .writeData(writeData), .pcOld(pcOld), .imm32(imm32), .rs1Data(rs1Data), .rs2Data(rs2Data),.rs1(rs1)); //finish
     OpMux om(.ALUSrc(ALUSrc), .rs2Data(rs2Data), .imm32(imm32), .pc(pc), .op2(op2));
     ALU alu(.op1(rs1Data), .op2(op2), .ALUOp(ALUOp), .ALUResult(ALUResult), .zero(zero));
     DMem dm(.clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .addr(ALUResult),.din(rs2Data), .dout(dout));
     WriteMux wc(.MemtoReg(MemtoReg), .ALUResult(ALUResult), .dout(dout), .writeData(writeData));
-
-
     
 endmodule
