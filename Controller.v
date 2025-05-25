@@ -1,9 +1,7 @@
-`timescale 1ns / 1ps
-
 module Controller(
     input [31:0] inst,
     output reg [3:0] ALUOp,
-    output reg [1:0] ALUSrc,
+    output reg [2:0] ALUSrc,
     output reg Branch, MemRead, MemWrite, MemtoReg, RegWrite
 );
 
@@ -12,7 +10,7 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
 
 always @(*) begin  // ALUOp
     case (inst[6:0])
-        L, S, I_jalr, J: ALUOp = 0;
+        L, S, I_jalr, J, U_lui, U_auipc: ALUOp = 0;
         B: begin
             case (inst[14:12])
                 0: ALUOp = 8;  // beq
@@ -43,7 +41,6 @@ always @(*) begin  // ALUOp
                 default: ALUOp = 0;
             endcase
         end
-        U_lui, U_auipc: ALUOp = 0;
         default: ALUOp = 0;
     endcase
 end
@@ -57,7 +54,10 @@ end
 
 always @(*) begin  // ALUSrc
     case (inst[6:0])
-        I, L, S, U_lui, U_auipc: ALUSrc = 1;
+        I, L, S: ALUSrc = 1;
+        J, I_jalr: ALUSrc = 2;
+        U_lui: ALUSrc = 3;
+        U_auipc: ALUSrc = 4;
         default: ALUSrc = 0;
     endcase
 end
