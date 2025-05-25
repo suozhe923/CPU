@@ -1,4 +1,3 @@
-
 module Decoder(
     input clk,
     input rst,
@@ -18,41 +17,42 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
     assign rs1 = registers[1]; // rs1Data is the value of the register specified by inst[19:15]
 
     // Immediate Generation Logic
-    reg [31:0] imm32_reg;
+    wire [31:0] imm32_reg;
     wire [6:0] opcode = inst[6:0];  // Opcode field (inst[6:0])
+    immGen ig(inst, imm32);
 
     always @(*) begin
         case(opcode)
             // B-type Instructions
             B: begin
-                imm32_reg = ( {{20{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8]} )<<1;
+                //imm32_reg = ( {{20{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8]} )<<1;
                 rs1Data = registers[inst[19:15]]; 
                 rs2Data = registers[inst[24:20]]; 
             end
 
             // S-type Instructions
             S: begin
-                imm32_reg = { {20{inst[31]}}, inst[31:25], inst[11:7] };
+                //imm32_reg = { {20{inst[31]}}, inst[31:25], inst[11:7] };
                 rs1Data = registers[inst[19:15]]; 
                 rs2Data = registers[inst[24:20]]; 
             end
 
             // I-type Instructions
             I, L : begin
-                imm32_reg = { {20{inst[31]}}, inst[31:20] };
+                //imm32_reg = { {20{inst[31]}}, inst[31:20] };
                 rs1Data = registers[inst[19:15]]; 
                 rs2Data = registers[inst[24:20]]; 
             end
 
             I_jalr: begin
-                imm32_reg = { {20{inst[31]}}, inst[31:20] };
+                //imm32_reg = { {20{inst[31]}}, inst[31:20] };
                 rs1Data = registers[inst[19:15]];  
                 rs2Data = pcOld+4-registers[inst[19:15]]; 
             end
 
             // J-type Instructions
             J: begin
-                imm32_reg = ( {{13{inst[31]}}, inst[19:12], inst[20], inst[30:21]} ) <<1;
+                //imm32_reg = ( {{13{inst[31]}}, inst[19:12], inst[20], inst[30:21]} ) <<1;
                 rs1Data = pcOld+4;  
                 rs2Data = 32'b0;  
                 // jal instruction store pcOld+4 in rd
@@ -60,12 +60,12 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
 
             // U-type Instructions
             U_lui: begin
-                imm32_reg = {inst[31:12], 12'b0};
+                //imm32_reg = {inst[31:12], 12'b0};
                 rs1Data = 32'b0;
                 rs2Data = 32'b0;  
             end
             U_auipc:begin
-                imm32_reg = {inst[31:12], 12'b0};
+                //imm32_reg = {inst[31:12], 12'b0};
                 rs1Data = pcOld;
                 rs2Data = 32'b0;
             end
@@ -73,7 +73,7 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
 
 
             default: begin 
-                imm32_reg = 32'b0;
+                //imm32_reg = 32'b0;
                 rs1Data = registers[inst[19:15]];   
                 rs2Data = registers[inst[24:20]];
             end
