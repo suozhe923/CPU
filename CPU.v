@@ -7,7 +7,7 @@ module CPU(
 
     output wire branch, // from Controller(Branch) to IFetch
     output wire [3:0] ALUOp, //from Controller to ALU
-    output wire [1:0] ALUSrc, // (determine op2) from Controller to OpMux
+    output wire [2:0] ALUSrc, // (determine op2) from Controller to OpMux
     output wire MemRead, // from Controller to DMem
     output wire MemWrite, // from Controller to DMem
     output wire MemtoReg, // from Controller to WriteMux
@@ -17,7 +17,7 @@ module CPU(
     output wire [31:0] rs2Data, // from Decoder to OpMux, DMem
     output wire [31:0] imm32, //from Decoder to IFetch(<< 1 in IFetch), OpMux
     
-    output wire [31:0] op2, // from OpMux to ALU
+    output wire [31:0] op1, op2, // from OpMux to ALU
 
     output wire [31:0] ALUResult, // from ALU to DMem and WriteMux
     output wire zero, // from ALU to IFetch
@@ -36,11 +36,11 @@ module CPU(
 // Fifth, DMem read/write with ALUResult and rs2Data at the negedge of clk
 // Sixth, WriteMux update the writeData with ALUResult and dout
 
-    IFetch ife(.clk(clk), .rst(rst), .branch(branch), .zero(zero), .imm32(imm32), .inst(inst), .pc(pc),.pcOld(pcOld),.rs1Data(rs1Data)); //finish
+    IFetch ife(.clk(clk), .rst(rst), .branch(branch), .zero(zero), .imm32(imm32), .inst(inst), .pc(pc),.pcOld(pcOld),.rs1Data(rs1Data)); 
     Controller ctrl(.inst(inst), .ALUOp(ALUOp), .ALUSrc(ALUSrc), .Branch(branch), .MemRead(MemRead), .MemWrite(MemWrite), .MemtoReg(MemtoReg), .RegWrite(RegWrite));
-    Decoder dc (.clk(clk), .rst(rst), .regWrite(RegWrite), .inst(inst), .writeData(writeData), .pcOld(pcOld), .imm32(imm32), .rs1Data(rs1Data), .rs2Data(rs2Data),.rs1(rs1)); //finish
-    OpMux om(.ALUSrc(ALUSrc), .rs2Data(rs2Data), .imm32(imm32), .pc(pc), .op2(op2));
-    ALU alu(.op1(rs1Data), .op2(op2), .ALUOp(ALUOp), .ALUResult(ALUResult), .zero(zero));
+    Decoder dc (.clk(clk), .rst(rst), .regWrite(RegWrite), .inst(inst), .writeData(writeData), .pcOld(pcOld), .imm32(imm32), .rs1Data(rs1Data), .rs2Data(rs2Data),.rs1(rs1)); 
+    ALUControl ac(.ALUSrc(ALUSrc), .rs1Data(rs1Data), .rs2Data(rs2Data), .imm32(imm32), .pc(pc), .op1(op1), .op2(op2));
+    ALU alu(.op1(op1), .op2(op2), .ALUOp(ALUOp), .ALUResult(ALUResult), .zero(zero));
     DMem dm(.clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .addr(ALUResult),.din(rs2Data), .dout(dout));
     WriteMux wc(.MemtoReg(MemtoReg), .ALUResult(ALUResult), .dout(dout), .writeData(writeData));
     
