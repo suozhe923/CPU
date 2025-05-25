@@ -1,37 +1,15 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2025/05/12 16:57:15
-// Design Name: 
-// Module Name: display_assign
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 /*
     Instructions for Use:
     In display_control(if exists or your control module):
-    1. Connect `content` to your data output port. 
-       Your content should be encoded refer to display_decode.
+    1. Connect `data` to your data output port. 
+       Your data should be encoded refer to display_decode.
     2. Connect `com` to seg select signal port.
     3. Connect `seg_out` to tube select signal port.
 */
 
 module display_assign(
     input clk, rst,
-    input [47:0] content,
+    input [31:0] data,
     output reg [7:0] com, seg_out
 );
 
@@ -40,6 +18,8 @@ reg [5:0] seg_in;
 reg [16:0] counter;
 
 // produce 1ms delay
+// 100MHz clock: 10ns/period
+// 10 * 100000 = 10^6 ns = 1ms
 always @(posedge clk or negedge rst)
   begin
     if (~rst)
@@ -81,14 +61,14 @@ end
 // for every dm, pass the corresponding value to seg.
 always @(*) begin
     case (dm)  // choose (8-dm)th seg
-        0: seg_in = content[5:0];  // 8
-        1: seg_in = content[11:6];  // 7
-        2: seg_in = content[17:12];  // 6
-        3: seg_in = content[23:18];  // 5
-        4: seg_in = content[29:24];  // 4
-        5: seg_in = content[35:30];  // 3
-        6: seg_in = content[41:36];  // 2
-        7: seg_in = content[47:42];  // 1
+        0: seg_in = data[3:0];  // 8
+        1: seg_in = data[7:4];  // 7
+        2: seg_in = data[11:8];  // 6
+        3: seg_in = data[15:12];  // 5
+        4: seg_in = data[19:16];  // 4
+        5: seg_in = data[23:20];  // 3
+        6: seg_in = data[27:24];  // 2
+        7: seg_in = data[31:28];  // 1
         default: seg_in = 6'b000000;  // default in blank
     endcase
 end
@@ -133,23 +113,6 @@ always @(*) begin
         35: seg_out = 8'b11011000;  // Z
         36: seg_out = 8'b00000000;  // blank
         default: seg_out = 8'b00000000;  // default in blank
-    endcase
-end
-
-endmodule
-
-// for every dm, pass the corresponding value to seg.
-always @(*) begin
-    case (dm)  // choose (8-dm)th seg
-        0: seg_in = content[5:0];  // 8
-        1: seg_in = content[11:6];  // 7
-        2: seg_in = content[17:12];  // 6
-        3: seg_in = content[23:18];  // 5
-        4: seg_in = content[29:24];  // 4
-        5: seg_in = content[35:30];  // 3
-        6: seg_in = content[41:36];  // 2
-        7: seg_in = content[47:42];  // 1
-        default: seg_in = 6'b000000;  // default in blank
     endcase
 end
 
