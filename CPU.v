@@ -1,6 +1,5 @@
-`timescale 1ns / 1ps
 module CPU(
-    input clk,rst,
+    input clk, rst,
     output wire [31:0] pc, // from IFetch to OpMux
     output wire [31:0] pcOld, // from IFetch to Decoder
     output wire [31:0] inst, // from IFetch to Decoder, Controller
@@ -12,6 +11,8 @@ module CPU(
     output wire MemWrite, // from Controller to DMem
     output wire MemtoReg, // from Controller to WriteMux
     output wire RegWrite, // from Controller to Decoder
+    output wire ioRead,
+    output wire ioWrite,
 
     output wire [31:0] rs1Data,// from Decoder to ALU
     output wire [31:0] rs2Data, // from Decoder to OpMux, DMem
@@ -22,6 +23,7 @@ module CPU(
     output wire [31:0] ALUResult, // from ALU to DMem and WriteMux
     output wire zero, // from ALU to IFetch
 
+    //output wire [31:0] addrOut,
     output wire [31:0] dout, // from DMem to WriteMux
 
     output wire [31:0] writeData, // from WriteMux to Decoder
@@ -37,11 +39,11 @@ module CPU(
 // Sixth, WriteMux update the writeData with ALUResult and dout
 
     IFetch ife(.clk(clk), .rst(rst), .branch(branch), .zero(zero), .imm32(imm32), .inst(inst), .pc(pc),.pcOld(pcOld),.rs1Data(rs1Data)); 
-    Controller ctrl(.inst(inst), .ALUOp(ALUOp), .ALUSrc(ALUSrc), .Branch(branch), .MemRead(MemRead), .MemWrite(MemWrite), .MemtoReg(MemtoReg), .RegWrite(RegWrite));
+    Controller ctrl(.inst(inst), .addr(ALUResult), .ALUOp(ALUOp), .ALUSrc(ALUSrc), .Branch(branch), .MemRead(MemRead), .MemWrite(MemWrite), .MemtoReg(MemtoReg), .RegWrite(RegWrite), .ioRead(ioRead), .ioWrite(ioWrite));
     Decoder dc (.clk(clk), .rst(rst), .regWrite(RegWrite), .inst(inst), .writeData(writeData), .pcOld(pcOld), .imm32(imm32), .rs1Data(rs1Data), .rs2Data(rs2Data),.rs1(rs1)); 
     ALUControl ac(.ALUSrc(ALUSrc), .rs1Data(rs1Data), .rs2Data(rs2Data), .imm32(imm32), .pc(pc), .op1(op1), .op2(op2));
     ALU alu(.op1(op1), .op2(op2), .ALUOp(ALUOp), .ALUResult(ALUResult), .zero(zero));
-    DMem dm(.clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .addr(ALUResult),.din(rs2Data), .dout(dout));
+    MemOrIO m(.clk(clk), .rst(rst), .MemRead(MemRead), .MemWrite(MemWrite), .ioRead(ioRead), .ioWrite(ioWrite), .addr_in(ALUResult), .din(rs2Data), .dout(dout));
     WriteMux wc(.MemtoReg(MemtoReg), .ALUResult(ALUResult), .dout(dout), .writeData(writeData));
     
 endmodule
