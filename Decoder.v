@@ -16,13 +16,10 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
     reg [31:0] registers [0:31];  // x0 hardwired to 0 (write-protected)
     assign rs1 = registers[1]; // rs1Data is the value of the register specified by inst[19:15]
 
-    // Immediate Generation Logic
-    wire [31:0] imm32_reg;
-    wire [6:0] opcode = inst[6:0];  // Opcode field (inst[6:0])
     immGen ig(inst, imm32);
 
     always @(*) begin
-        case(opcode)
+        case (inst[6:0])
             // B-type Instructions
             B: begin
                 //imm32_reg = ( {{20{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8]} )<<1;
@@ -70,17 +67,13 @@ parameter J = 7'b1101111, I_jalr = 7'b1100111, U_lui = 7'b0110111, U_auipc = 7'b
                 rs2Data = 32'b0;
             end
 
-
-
             default: begin 
                 //imm32_reg = 32'b0;
                 rs1Data = registers[inst[19:15]];   
                 rs2Data = registers[inst[24:20]];
             end
-
         endcase
     end
-    assign imm32 = imm32_reg;
 
     // Synchronous Register Write
     integer i;
