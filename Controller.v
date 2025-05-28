@@ -1,8 +1,8 @@
 module Controller(
-    input [31:0] inst,
+    input [31:0] inst, addr,
     output reg [3:0] ALUOp,
     output reg [2:0] ALUSrc,
-    output reg Branch, MemRead, MemWrite, MemtoReg, RegWrite
+    output reg Branch, MemRead, MemWrite, MemtoReg, RegWrite, ioRead, ioWrite
 );
 
 parameter R = 7'b0110011, I = 7'b0010011, L = 7'b0000011, S = 7'b0100011, B = 7'b1100011;
@@ -62,32 +62,52 @@ always @(*) begin  // ALUSrc
     endcase
 end
 
-always @(*) begin  // MemRead, MemtoReg
-    if (inst[6:0] == L) begin
-        MemRead = 1;
-        MemtoReg = 1;
-    end
-    else begin
-        MemRead = 0;
-        MemtoReg = 0;
-    end
+always @(*) begin  // MemtoReg, MemRead, ioRead
+    case (inst[6:0])
+        L: begin
+            MemtoReg = 1;
+            if (addr[31:16] == 16'hFFFF) begin
+                MemRead = 0;
+                ioRead = 1;
+            end
+            else begin
+                MemRead = 1;
+                ioRead = 0;
+            end
+        end
+        default: begin
+            MemtoReg = 0;
+            MemRead = 0;
+            ioRead = 0;
+        end
+    endcase
 end
 
-always @(*) begin  // RegWrite, MemWrite
+always @(*) begin  // RegWrite, MemWrite, ioWrite
     case (inst[6:0])
         R, I, L, J, I_jalr, U_lui, U_auipc: begin
             RegWrite = 1;
             MemWrite = 0;
+            ioWrite = 0;
         end
         S: begin
             RegWrite = 0;
-            MemWrite = 1;
+            if (addr[31:16] == 16'hFFFF) begin
+                MemWrite = 0;
+                ioWrite = 1;
+            end
+            else begin
+                MemWrite = 1;
+                ioWrite = 0;
+            end
         end
         default: begin
             RegWrite = 0;
             MemWrite = 0;
+            ioWrite = 0;
         end
     endcase
 end
+
 
 endmodule
