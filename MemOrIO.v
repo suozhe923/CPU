@@ -7,9 +7,7 @@ module MemOrIO(
     input ioWrite,  // write IO, from Controller
 
     input [31:0] addr_in,  // from ALUResult
-    output [31:0] addr_out,  // address to DMem
 
-    input [31:0] MemData,  // data read from DMem
     input [7:0] switch,  // data from little switch
     input [7:0] SWITCH,  // data from big switch
     input button,
@@ -17,15 +15,13 @@ module MemOrIO(
     input [31:0] din,  // data read from Decoder(register file)
     output reg [31:0] dout,  // data to Decoder(register file)
 
-    output reg [31:0] writeData,  // data to Memory
     output reg [7:0] LED,  // data to big LED
     output reg [7:0] led,  // data to little LED
     output reg [31:0] seg  // data to 7-segment tube
 );
 
-DMem m(.clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .addr(addr_in), .din(writeData), .dout(MemData));
-
-assign addr_out = addr_in;
+wire [31:0] MemData;
+DMem m(.clk(clk), .MemRead(MemRead), .MemWrite(MemWrite), .addr(addr_in), .din(din), .dout(MemData));
 
 // The data write to register file may be from memory or IO.
 reg [31:0] ioData;  // data from IO
@@ -45,14 +41,6 @@ always @* begin
         dout = 32'h0;
 end
 
-// data written to Memory
-always @* begin
-    if (MemWrite || ioWrite)
-        writeData = (MemWrite) ? din : ioData;
-    else
-        writeData = 32'h0;
-end
-
 // data from IO
 always @(*) begin
     case (addr_in)
@@ -61,12 +49,13 @@ always @(*) begin
         32'hFFFF000C:  // Switchlittle
             ioData = SwitchCtrl ? {24'h0, switch} : 32'h0;
         32'hFFFF0010:  // Buttons
-            ioData = ButtonCtrl ? {31'b0, button} : 32'h0;
+            ioData = ButtonCtrl ? {31'h0, button} : 32'h0;
+        default: ioData = 32'h0;
     endcase
 end
 
 // data from Memory to IO
-always @(*) begin
+always @(posedge clk or negedge rst) begin
     if (!rst) begin
         LED <= 8'h0;
         led <= 8'h0;
@@ -75,19 +64,19 @@ always @(*) begin
     else begin
         case (addr_in)
             32'hFFFF0000: begin  // LEDbig
-                LED <= LEDCtrl ? MemData[7:0] : LED;
+                LED <= LEDCtrl ? din[7:0] : LED;
                 led <= led;
                 seg <= seg;
             end
             32'hFFFF0004: begin  // LEDlittle
                 LED <= LED;
-                led <= LEDCtrl ? MemData[7:0] : led;
+                led <= LEDCtrl ? din[7:0] : led;
                 seg <= seg;
             end
             32'hFFFF0014: begin
                 LED <= LED;
                 led <= led;
-                seg <= SegCtrl ? MemData : seg;
+                seg <= SegCtrl ? din : seg;
             end
             default: begin
                 LED <= LED;
