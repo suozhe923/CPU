@@ -10,7 +10,7 @@ module MemOrIO(
 
     input [7:0] switch,  // data from little switch
     input [7:0] SWITCH,  // data from big switch
-    input button,
+    input button0, button1, button2, button3,
 
     input [31:0] din,  // data read from Decoder(register file)
     output reg [31:0] dout,  // data to Decoder(register file)
@@ -30,8 +30,8 @@ reg [31:0] ioData;  // data from IO
 wire LEDCtrl, SwitchCtrl, ButtonCtrl, SegCtrl;
 assign SwitchCtrl = (ioRead && (addr_in == 32'hFFFF0008 || addr_in == 32'hFFFF000C)) ? 1 : 0;
 assign LEDCtrl = (ioWrite && (addr_in == 32'hFFFF0000 || addr_in == 32'hFFFF0004)) ? 1 : 0;
-assign ButtonCtrl = (ioRead && addr_in == 32'hFFFF0010) ? 1 : 0;
-assign SegCtrl = (ioWrite && addr_in == 32'hFFFF0014) ? 1 : 0;
+assign ButtonCtrl = (ioRead && (addr_in == 32'hFFFF0010 || addr_in == 32'hFFFF0014 || addr_in == 32'hFFFF0018 || addr_in == 32'hFFFF001C)) ? 1 : 0;
+assign SegCtrl = (ioWrite && addr_in == 32'hFFFF0020) ? 1 : 0;
 
 // data written to reg
 always @* begin
@@ -48,8 +48,14 @@ always @(*) begin
             ioData = SwitchCtrl ? {24'h0, SWITCH} : 32'h0;
         32'hFFFF000C:  // Switchlittle
             ioData = SwitchCtrl ? {24'h0, switch} : 32'h0;
-        32'hFFFF0010:  // Buttons
-            ioData = ButtonCtrl ? {31'h0, button} : 32'h0;
+        32'hFFFF0010:  // Button0
+            ioData = ButtonCtrl ? {31'h0, button0} : 32'h0;
+        32'hFFFF0014:  // Button1
+            ioData = ButtonCtrl ? {31'h0, button1} : 32'h0;
+        32'hFFFF0018:  // Button2
+            ioData = ButtonCtrl ? {31'h0, button2} : 32'h0;
+        32'hFFFF001C:  // Button3
+            ioData = ButtonCtrl ? {31'h0, button3} : 32'h0;
         default: ioData = 32'h0;
     endcase
 end
@@ -73,7 +79,7 @@ always @(posedge clk or negedge rst) begin
                 led <= LEDCtrl ? din[7:0] : led;
                 seg <= seg;
             end
-            32'hFFFF0014: begin
+            32'hFFFF0020: begin  // 7-Seg Tubes
                 LED <= LED;
                 led <= led;
                 seg <= SegCtrl ? din : seg;
@@ -94,5 +100,8 @@ endmodule
 // LEDlittle: 0xFFFF0004 - 0xFFFF0007
 // Switchbig: 0xFFFF0008 - 0xFFFF000B
 // Switchlittle: 0xFFFF000C - 0xFFFF000F
-// Button: 0xFFFF0010 - 0xFFFF0013, 
-// 7-Seg Tubes: 0xFFFF0014 - 0xFFFF0017
+// Button0: 0xFFFF0010 - 0xFFFF0013
+// Button1: 0xFFFF0014 - 0xFFFF0017
+// Button2: 0xFFFF0018 - 0xFFFF001B
+// Button3: 0xFFFF001C - 0xFFFF001F
+// 7-Seg Tubes: 0xFFFF0020 - 0xFFFF0023
