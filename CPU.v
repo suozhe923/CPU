@@ -2,7 +2,7 @@ module CPU(
     input clk_in, rst,
     input [7:0] switch,  // data from little switch
     input [7:0] SWITCH,  // data from big switch
-    input button,
+    input button0, button1, button2, button3,  // buttons
 
     output [7:0] LED,  // data to big LED
     output [7:0] led,  // data to little LED
@@ -18,6 +18,7 @@ module CPU(
 // Sixth, WriteMux update the writeData with ALUResult and dout
 
 wire clk;
+wire b0, b1, b2; // from debounce_1b to MemOrIO
 wire [31:0] pc; // from IFetch to OpMux
 wire [31:0] pcOld; // from IFetch to Decoder
 wire [31:0] inst; // from IFetch to Decoder, Controller
@@ -48,13 +49,16 @@ wire [31:0] writeData; // from WriteMux to Decoder
 wire [31:0] segData; // data to 7-segment tube
 
 cpuclk c(.clk_in1(clk_in), .cpu_clk(clk));
+// debounce_1b db0(.clk(clk), .rst(rst), .key(button0), .key_flag(b0));
+// debounce_1b db1(.clk(clk), .rst(rst), .key(button1), .key_flag(b1));
+// debounce_1b db2(.clk(clk), .rst(rst), .key(button2), .key_flag(b2));
 IFetch ife(.clk(clk), .rst(rst), .branch(branch), .zero(zero), .imm32(imm32), .inst(inst), .pc(pc),.pcOld(pcOld),.rs1Data(rs1Data)); 
 Controller ctrl(.inst(inst), .addr(ALUResult), .ALUOp(ALUOp), .ALUSrc(ALUSrc), .Branch(branch), .MemRead(MemRead), .MemWrite(MemWrite), .MemtoReg(MemtoReg), .RegWrite(RegWrite), .ioRead(ioRead), .ioWrite(ioWrite));
 Decoder dc (.clk(clk), .rst(rst), .regWrite(RegWrite), .inst(inst), .writeData(writeData), .imm32(imm32), .rs1Data(rs1Data), .rs2Data(rs2Data)); 
 ALUControl ac(.ALUSrc(ALUSrc), .rs1Data(rs1Data), .rs2Data(rs2Data), .imm32(imm32), .pc(pc), .op1(op1), .op2(op2));
 ALU alu(.op1(op1), .op2(op2), .ALUOp(ALUOp), .ALUResult(ALUResult), .zero(zero));
-MemOrIO m(.clk(clk), .rst(rst), .MemRead(MemRead), .MemWrite(MemWrite), .ioRead(ioRead), .ioWrite(ioWrite), .addr_in(ALUResult), .din(rs2Data), .dout(dout), .LED(LED), .led(led), .seg(segData), .switch(switch), .SWITCH(SWITCH), .button(button));
+MemOrIO m(.clk(clk), .rst(rst), .MemRead(MemRead), .MemWrite(MemWrite), .ioRead(ioRead), .ioWrite(ioWrite), .addr_in(ALUResult), .din(rs2Data), .dout(dout), .LED(LED), .led(led), .seg(segData), .switch(switch), .SWITCH(SWITCH), .button0(button0), .button1(button1), .button2(button2), .button3(button3));
 WriteMux wc(.MemtoReg(MemtoReg), .ALUResult(ALUResult), .dout(dout), .writeData(writeData));
 display_assign da(.clk(clk_in), .rst(rst), .data(segData), .com(com), .seg_out_left(seg_out_left), .seg_out_right(seg_out_right));
-    
+
 endmodule
