@@ -9,7 +9,7 @@ always @(*) begin
             op1 = rs1Data;
             op2 = rs2Data;
         end
-        1 : begin  // I-type
+        1 : begin  // i-type
             op1 = rs1Data;
             op2 = imm32;
         end
@@ -24,6 +24,10 @@ always @(*) begin
         4: begin  // auipc
             op1 = pc;
             op2 = imm32;
+        end
+        5: begin  // slli, srli, srai
+            op1 = rs1Data;
+            op2 = {27'b0, imm32[4:0]};
         end
         default: begin
             op1 = 0;
