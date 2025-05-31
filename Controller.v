@@ -54,7 +54,11 @@ end
 
 always @(*) begin  // ALUSrc
     case (inst[6:0])
-        I, L, S: ALUSrc = 1;
+        I: begin
+            if (inst[14:12] == 1 || inst[14:12] == 5) ALUSrc = 5;  // slli, srli, srai
+            else ALUSrc = 1;  // other i-type
+        end
+        L, S: ALUSrc = 1;
         J, I_jalr: ALUSrc = 2;
         U_lui: ALUSrc = 3;
         U_auipc: ALUSrc = 4;
