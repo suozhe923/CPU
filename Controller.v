@@ -2,7 +2,7 @@ module Controller(
     input [31:0] inst, addr,
     output reg [3:0] ALUOp,
     output reg [2:0] ALUSrc,
-    output reg Branch, MemRead, MemWrite, MemtoReg, RegWrite, ioRead, ioWrite
+    output reg Branch, MemRead, MemWrite, MemtoReg, RegWrite, ioRead, ioWrite, is_signed
 );
 
 parameter R = 7'b0110011, I = 7'b0010011, L = 7'b0000011, S = 7'b0100011, B = 7'b1100011;
@@ -66,7 +66,7 @@ always @(*) begin  // ALUSrc
     endcase
 end
 
-always @(*) begin  // MemtoReg, MemRead, ioRead
+always @(*) begin  // MemtoReg, MemRead, ioRead, is_signed
     case (inst[6:0])
         L: begin
             MemtoReg = 1;
@@ -78,11 +78,13 @@ always @(*) begin  // MemtoReg, MemRead, ioRead
                 MemRead = 1;
                 ioRead = 0;
             end
+            is_signed = inst[14:12] == 0 || inst[14:12] == 1;  // lw, lb, lbu
         end
         default: begin
             MemtoReg = 0;
             MemRead = 0;
             ioRead = 0;
+            is_signed = 0;
         end
     endcase
 end
@@ -112,6 +114,7 @@ always @(*) begin  // RegWrite, MemWrite, ioWrite
         end
     endcase
 end
+
 
 
 endmodule
