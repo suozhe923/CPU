@@ -5,6 +5,7 @@ module MemOrIO(
     input MemWrite,  // write memory, from Controller
     input ioRead,  // read IO, from Controller
     input ioWrite,  // write IO, from Controller
+    input is_signed,  // signed or not, from Controller
 
     input [31:0] addr_in,  // from ALUResult
 
@@ -45,9 +46,9 @@ end
 always @(*) begin
     case (addr_in)
         32'hFFFF0008:  // Switchbig
-            ioData = SwitchCtrl ? {24'h0, SWITCH} : 32'h0;
+            ioData = SwitchCtrl ? is_signed ? {{24{SWITCH[7]}}, SWITCH} : {24'h0, SWITCH} : 32'h0;
         32'hFFFF000C:  // Switchlittle
-            ioData = SwitchCtrl ? {24'h0, switch} : 32'h0;
+            ioData = SwitchCtrl ? is_signed ? {{24{switch[7]}}, switch} : {24'h0, switch} : 32'h0;
         32'hFFFF0010:  // Button0
             ioData = ButtonCtrl ? {31'h0, button0} : 32'h0;
         32'hFFFF0014:  // Button1
