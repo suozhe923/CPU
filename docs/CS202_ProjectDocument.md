@@ -195,7 +195,7 @@ The output data is 32-bit wide. The **7-seg tube** shows the **hexadecimal form*
 | Simulation     | Integration test - `CPU`               | Manually write different types of instructions, generate the corresponding .coe files, and observe the CPU operation status through waveform. | Passed      |
 | On Board       | Unit test - IO                         | Copy the data from the DIP switch to the LED and 7-seg tube through RISC-V code, observe to test. | Passed      |
 | On Board       | Integration test - Test Scenario 1     | Test the CPU functionality and the correctness of the assembly code of Test Scenario 1. | Passed      |
-| On Board       | Integration test - Test Scenario 1     | Test the correctness of the assembly code in Test Scenario 2. | Passed      |
+| On Board       | Integration test - Test Scenario 2     | Test the correctness of the assembly code in Test Scenario 2. | Passed      |
 
 #### Conclusion
 
