@@ -164,7 +164,7 @@ Considering the overall complexity of system design and the limited scale of our
 
 ## Instructions for Using the System Board
 
-![IO_Planning](.\CS202 Course Project.assets\IO_Planning-1749234760634-2.png)
+![IO_Planning](/docs/CS202_ProjectDocument.assets/IO_Planning-1749234760634-2.png)
 
 #### How to Complete Tests
 
@@ -323,7 +323,7 @@ test2_7_auipc:
 	sw a0, 0x20(t0)  # store the result of auipc to seg tubes
 ```
 
-![bonus_test_comparison](.\CS202_ProjectDocument.assets\bonus_test_comparison.png)
+![bonus_test_comparison](/docs/CS202_ProjectDocument.assets/bonus_test_comparison.png)
 
 ##### Test Results
 
